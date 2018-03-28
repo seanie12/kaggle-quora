@@ -99,3 +99,9 @@ ENV/
 
 # mypy
 .mypy_cache/
+
+
+# other than source compiled
+kaggle-quora/data/
+kaggle-quora/saved
+kaggle-quora/.idea
