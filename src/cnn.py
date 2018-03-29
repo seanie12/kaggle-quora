@@ -33,17 +33,26 @@ class CNN(object):
         num_filter_total = num_filters * len(filter_sizes)
         h_pool = tf.concat(pooled_output, 3)
         flatten = tf.reshape(h_pool, shape=[-1, num_filter_total])
-        h_drop = tf.nn.dropout(flatten, keep_prob=self.dropout_keep_prob)
 
-        self.outputs_a = h_drop[:self.batch_size]
-        self.outputs_b = h_drop[self.batch_size:]
-
+        self.outputs_a = flatten[:self.batch_size]
+        self.outputs_b = flatten[self.batch_size:]
+        self.outputs = tf.concat([self.outputs_a, self.outputs_b], axis=1)
+        # batch normalization
+        self.normalized = tf.layers.batch_normalization(self.outputs)
         with tf.variable_scope("output"):
-            self.manhattan_dist = tf.reduce_sum(tf.abs(self.outputs_a - self.outputs_b), axis=1, name="dist")
-            self.predictions = tf.exp(-self.manhattan_dist, name="predictions")
-            self.loss = tf.reduce_sum(tf.losses.mean_squared_error(labels=self.input_y, predictions=self.predictions),
-                                      name="loss")
-
-            predictions = tf.cast(self.predictions > 0.5, "float")
-            correct_pred = tf.equal(predictions, tf.cast(self.input_y, "float"))
+            # self.manhattan_dist = tf.reduce_sum(tf.abs(self.outputs_a - self.outputs_b), axis=1, name="dist")
+            # self.predictions = tf.exp(-self.manhattan_dist, name="predictions")
+            # self.loss = tf.reduce_sum(tf.losses.mean_squared_error(labels=self.input_y, predictions=self.predictions),
+            #                           name="loss")
+            #
+            # predictions = tf.cast(self.predictions > 0.5, "float")
+            w_softmax = tf.get_variable(shape=[num_filter_total * 2, 2],
+                                        initializer=tf.contrib.layers.xavier_initializer(),
+                                        name="w_softmax")
+            b_softmax = tf.get_variable(shape=[2], initializer=tf.contrib.layers.xavier_initializer(), name="b_softmax")
+            self.logits = tf.matmul(self.normalized, w_softmax) + b_softmax
+            self.losses = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=self.logits, labels=self.input_y)
+            self.loss = tf.reduce_mean(self.losses)
+            self.predictions = tf.argmax(self.logits, axis=1)
+            correct_pred = tf.equal(self.predictions, tf.cast(self.input_y, tf.int64))
             self.acc = tf.reduce_mean(tf.cast(correct_pred, "float"))

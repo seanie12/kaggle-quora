@@ -9,9 +9,9 @@ batch_size = 64
 embedding_size = 300
 hidden_size = 50
 learning_rate = 1e-4
-max_grad_norm = 5.0
+max_grad_norm = 1.25
 dropout_keep_prob = 0.5
-num_epochs = 1000
+num_epochs = 25
 filter_sizes = [3, 4, 5]
 dev_ratio = 0.1
 # load data and labels
@@ -38,8 +38,10 @@ with tf.Graph().as_default():
         global_step = tf.Variable(0, name="global_step", trainable=False)
         tvars = tf.trainable_variables()
         grads, global_norm = tf.clip_by_global_norm(tf.gradients(model.loss, tvars), max_grad_norm)
+        update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
         optimizer = tf.train.AdamOptimizer(learning_rate)
-        train_op = optimizer.apply_gradients(zip(grads, tvars), name="train_op", global_step=global_step)
+        with tf.control_dependencies(update_ops):
+            train_op = optimizer.apply_gradients(zip(grads, tvars), name="train_op", global_step=global_step)
         checkpoint_dir = "../saved/CNN/checkpoints"
         if not os.path.exists(checkpoint_dir):
             os.makedirs(checkpoint_dir)
