@@ -12,7 +12,7 @@ learning_rate = 1e-4
 max_grad_norm = 5.0
 dropout_keep_prob = 0.5
 num_epochs = 1000
-filter_sizes = [3,4,5]
+filter_sizes = [3, 4, 5]
 dev_ratio = 0.1
 # load data and labels
 input_a, input_b, labels, vocab = utils.load_data_labels("../data/train.csv", train=True)
@@ -34,7 +34,7 @@ with tf.Graph().as_default():
     with sess.as_default():
         print("load the model")
         model = CNN(vocab_size=vocab_size, embedding_size=embedding_size, num_filters=128,
-                        seq_length=seq_length, filter_sizes=filter_sizes)
+                    seq_length=seq_length, filter_sizes=filter_sizes)
         global_step = tf.Variable(0, name="global_step", trainable=False)
         tvars = tf.trainable_variables()
         grads, global_norm = tf.clip_by_global_norm(tf.gradients(model.loss, tvars), max_grad_norm)
@@ -88,6 +88,7 @@ with tf.Graph().as_default():
             loss, acc = sess.run([model.loss, model.acc], feed_dict=feed_dict)
 
             return loss, acc
+
 
         batches = utils.batch_iter(list(zip(input_a, input_b, labels)), num_epochs=num_epochs,
                                    batch_size=batch_size)

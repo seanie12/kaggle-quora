@@ -10,7 +10,7 @@ embedding_size = 300
 hidden_size = 50
 learning_rate = 1e-4
 max_grad_norm = 1.25
-dropout_keep_prob = 0.3
+dropout_keep_prob = 1.0
 num_epochs = 25
 dev_ratio = 0.1
 # load data and labels

@@ -37,7 +37,9 @@ class MA_LSTM(object):
         with tf.variable_scope("output"):
             self.manhattan_dist = tf.reduce_sum(tf.abs(self.outputs_a - self.outputs_b), axis=1, name="dist")
             self.sim = tf.exp(-self.manhattan_dist, name="sim")
-            self.loss = tf.losses.mean_squared_error(labels=self.input_y, predictions=self.sim, name="loss")
+            # reduce_sum does not affect to result but it is used for attribute name
+            self.loss = tf.reduce_sum(tf.losses.mean_squared_error(labels=self.input_y, predictions=self.sim),
+                                      name="loss")
 
         self.predictions = tf.cast(self.sim > 0.5, "float")
         correct_pred = tf.equal(self.predictions, tf.cast(self.input_y, tf.float32))
