@@ -1,4 +1,4 @@
-# kaggle-quora
+# Kaggle-Quora question pair
 code for kaggle quora question pair competition
 
 Implement "Siamese Recurrent Architectures for Learning Sentence Similarity"(2016, Jonams Mueller, Aditya Thyagarajan)
